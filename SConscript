@@ -36,7 +36,7 @@ if GetDepend('PKG_USING_SSD1327'):
     src2 += Glob('SimpleGUI/GUI/src/SGUI_Text.c')
     
 # add SimpleGUI GUI include path.
-path2  = [cwd + 'SimpleGUI/GUI/inc']
+path2  = [cwd + '/SimpleGUI/GUI/inc']
 
 # add src2 and include to group.
 group = DefineGroup('GUI', src2, depend = ['PKG_USING_SSD1327'], CPPPATH = path2)
@@ -47,7 +47,7 @@ if GetDepend('PKG_USING_SSD1327'):
     src3 += Glob('SimpleGUI/HMI/src/HMI_Engine.c')
     
  # add SimpleGUI HMI include path.
-path3  = [cwd + 'SimpleGUI/HMI/inc'] 
+path3  = [cwd + '/SimpleGUI/HMI/inc'] 
  
 # add src3 and include to group.
 group = DefineGroup('HMI', src3, depend = ['PKG_USING_SSD1327'], CPPPATH = path3) 

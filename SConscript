@@ -6,8 +6,8 @@ cwd    = GetCurrentDir()
 src1   = []
 # add ssd1327 src files.
 if GetDepend('PKG_USING_SSD1327'):
-    src1 += Glob('src1/ssd1327.c')
-    src1 += Glob('src1/oled.c')
+    src1 += Glob('src/ssd1327.c')
+    src1 += Glob('src/oled.c')
 if GetDepend('PKG_USING_SSD1327_SAMPLE'):
     src1 += Glob('samples/ssd1327_sample.c')
     
@@ -39,7 +39,7 @@ if GetDepend('PKG_USING_SSD1327'):
 path2  = [cwd + 'SimpleGUI/GUI/inc']
 
 # add src2 and include to group.
-group += DefineGroup('GUI', src2, depend = ['PKG_USING_SSD1327'], CPPPATH = path2)
+group = DefineGroup('GUI', src2, depend = ['PKG_USING_SSD1327'], CPPPATH = path2)
 
 src3   = []
 # add SimpleGUI HMI src files.   
@@ -50,5 +50,5 @@ if GetDepend('PKG_USING_SSD1327'):
 path3  = [cwd + 'SimpleGUI/HMI/inc'] 
  
 # add src3 and include to group.
-group += DefineGroup('HMI', src3, depend = ['PKG_USING_SSD1327'], CPPPATH = path3) 
+group = DefineGroup('HMI', src3, depend = ['PKG_USING_SSD1327'], CPPPATH = path3) 
 Return('group')

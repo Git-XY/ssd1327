@@ -16,7 +16,6 @@ path1  = [cwd + '/inc']
 
 # add src1 and include to group.
 group = DefineGroup('Ssd1327', src1, depend = ['PKG_USING_SSD1327'], CPPPATH = path1)
-group = DefineGroup('Ssd1327', src1, depend = ['PKG_USING_SSD1327_SAMPLE'], CPPPATH = path1)
 src2   = []
 # add SimpleGUI GUI src files.   
 if GetDepend('PKG_USING_SSD1327'):

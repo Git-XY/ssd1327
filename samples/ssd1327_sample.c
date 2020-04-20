@@ -8,8 +8,10 @@ void ssd1327_sample()
 {
 
 	//SCREEN_Initialize();//ssd1327.c init.
+	
 	SCREEN_ClearDisplay();
-    
+    ssd1327_set_power(POWER_ON);
+	
 	SGUI_SCR_DEV Oled128X96   = {0x00};
 	Oled128X96.fnInitialize   = SCREEN_Initialize;
     Oled128X96.stSize.iWidth  = 128;

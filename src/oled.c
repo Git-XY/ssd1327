@@ -116,8 +116,6 @@ int	 SCREEN_Initialize(void)
 void SCREEN_ClearDisplay(void)
 {
     rt_memset(frameBuffer, 0, sizeof(frameBuffer));
-//	oled_set_show_range(0,127,0,95);
-//    ssd1327_write_large_data(frameBuffer,OLED_FRAME_BUFFER_SIZE);
 }
 void SCREEN_RefreshScreen(void)
 {

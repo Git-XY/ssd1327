@@ -1,6 +1,6 @@
 #include "ssd1327.h"
 #include <board.h>
-
+#include <drv_spi.h>
 #define SPI_BUS_NAME				"spi2"
 #define SPI_SSD1327_DEVICE_NAME 	"spi20"
 
@@ -17,35 +17,40 @@
 #define SSD1327_TRACE(...)
 #endif
 
-struct stm32_hw_spi_cs
-{
-    rt_uint32_t pin;
-};
+//struct stm32_hw_spi_cs
+//{
+//    rt_uint32_t pin;
+//};
 
-static struct rt_spi_device spi_dev_ssd1327;
+static struct rt_spi_device *spi_dev_ssd1327;
 static struct stm32_hw_spi_cs  spi_cs;
 
 static rt_err_t rt_hw_ssd1327_config(void)
 {
     rt_err_t res;
 
-    spi_cs.pin = CS_PIN;
-    rt_pin_mode(spi_cs.pin, PIN_MODE_OUTPUT);
-
-    res = rt_spi_bus_attach_device(&spi_dev_ssd1327, SPI_SSD1327_DEVICE_NAME, SPI_BUS_NAME, (void*)&spi_cs);
+//    spi_cs.pin = CS_PIN;
+//    rt_pin_mode(spi_cs.pin, PIN_MODE_OUTPUT);
+   struct rt_spi_configuration cfg;
+    res = rt_hw_spi_device_attach(SPI_BUS_NAME, SPI_SSD1327_DEVICE_NAME, GPIOC, GPIO_PIN_8);
     if (res != RT_EOK)
     {
         SSD1327_TRACE("rt_spi_bus_attach_device!\r\n");
         return res;
     }
-
-    /* config spi */
-    {
-        struct rt_spi_configuration cfg;
+	     
         cfg.data_width = 8;
         cfg.mode       = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
         cfg.max_hz     = 5* 1000 *1000; /* 5M,SPI max 5MHz,ssd1327 4-wire spi */
-        rt_spi_configure(&spi_dev_ssd1327, &cfg);
+     spi_dev_ssd1327 = (struct rt_spi_device *)rt_device_find(SPI_SSD1327_DEVICE_NAME);
+	if (!spi_dev_ssd1327)
+    {
+        rt_kprintf("spi sample run failed! can't find %s device!\n", SPI_SSD1327_DEVICE_NAME);
+    }
+	else
+    /* config spi */
+    {
+        rt_spi_configure(spi_dev_ssd1327, &cfg);
     }
 
     return RT_EOK;
@@ -77,7 +82,7 @@ INIT_DEVICE_EXPORT(rt_hw_ssd1327_init);
 rt_err_t ssd1327_write_cmd(const rt_uint8_t cmd)
 {
     rt_pin_write(DC_PIN, PIN_LOW);
-    if (rt_spi_send(&spi_dev_ssd1327, &cmd, 1) != 1)
+    if (rt_spi_send(spi_dev_ssd1327, &cmd, 1) != 1)
     {
         SSD1327_TRACE("ssd1327_write_cmd error.\r\n");
         return -RT_ERROR;
@@ -89,7 +94,7 @@ rt_err_t ssd1327_write_large_cmd(const rt_uint8_t *cmd,rt_uint16_t len)
 {
 	    rt_pin_write(DC_PIN, PIN_LOW);
 	
-    if (rt_spi_send(&spi_dev_ssd1327, cmd, len) != len)
+    if (rt_spi_send(spi_dev_ssd1327, cmd, len) != len)
     {
         SSD1327_TRACE("ssd1327_write_large_cmd error.\r\n");
         return -RT_ERROR;
@@ -101,7 +106,7 @@ rt_err_t ssd1327_write_large_cmd(const rt_uint8_t *cmd,rt_uint16_t len)
 rt_err_t ssd1327_write_large_data(const rt_uint8_t *data,rt_uint16_t len)
 {
     rt_pin_write(DC_PIN, PIN_HIGH);
-    if (rt_spi_send(&spi_dev_ssd1327, data, len) != len)
+    if (rt_spi_send(spi_dev_ssd1327, data, len) != len)
     {
         SSD1327_TRACE("ssd1327_write_large_data error.\r\n");
         return -RT_ERROR;

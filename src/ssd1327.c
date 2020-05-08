@@ -1,6 +1,7 @@
 #include "ssd1327.h"
 #include <board.h>
 #include <drv_spi.h>
+#if defined(PKG_USING_SSD1327) || defined(RT_DEBUG_SSD1327)
 #define SPI_BUS_NAME				"spi2"
 #define SPI_SSD1327_DEVICE_NAME 	"spi20"
 
@@ -9,39 +10,20 @@
 #define CS_PIN   GET_PIN(C, 8)
 
 #define SWAP(a,b) (a) ^= (b);(b) = (a)^(b);(a) ^= (b);
-#define SSD1327_DEBUG
-
-#ifdef  SSD1327_DEBUG
-#define SSD1327_TRACE         rt_kprintf
-#else
-#define SSD1327_TRACE(...)
-#endif
-
-//struct stm32_hw_spi_cs
-//{
-//    rt_uint32_t pin;
-//};
 
 static struct rt_spi_device *spi_dev_ssd1327;
-static struct stm32_hw_spi_cs  spi_cs;
 
-static rt_err_t rt_hw_ssd1327_config(void)
+static int rt_hw_ssd1327_config(void)
 {
     rt_err_t res;
-
-//    spi_cs.pin = CS_PIN;
-//    rt_pin_mode(spi_cs.pin, PIN_MODE_OUTPUT);
    struct rt_spi_configuration cfg;
     res = rt_hw_spi_device_attach(SPI_BUS_NAME, SPI_SSD1327_DEVICE_NAME, GPIOC, GPIO_PIN_8);
     if (res != RT_EOK)
-    {
-        SSD1327_TRACE("rt_spi_bus_attach_device!\r\n");
         return res;
-    }
 	     
-        cfg.data_width = 8;
-        cfg.mode       = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
-        cfg.max_hz     = 5* 1000 *1000; /* 5M,SPI max 5MHz,ssd1327 4-wire spi */
+	cfg.data_width = 8;
+	cfg.mode       = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
+	cfg.max_hz     = 20* 1000 *1000; 
      spi_dev_ssd1327 = (struct rt_spi_device *)rt_device_find(SPI_SSD1327_DEVICE_NAME);
 	if (!spi_dev_ssd1327)
     {
@@ -72,45 +54,38 @@ int rt_hw_ssd1327_init(void)
 	 0xa4,0xa8,0x7f,0xab,0x01,0x81,0x77,
 	 0xb1,0x31,0xb3,0xb1,0xb5,0x03,0xb6,
 	 0x0d,0xbc,0x07,0xbe,0x07,0xd5,0x02};//,0xAF
-		if(ssd1327_write_large_cmd(buf,sizeof(buf))!= RT_EOK)
+	if(ssd1327_write_large_cmd(buf,sizeof(buf))!= RT_EOK)
 		 return -RT_ERROR;
     return RT_EOK;
 }
+#if !defined(PRO_USING_DEVICE_INIT)
 INIT_DEVICE_EXPORT(rt_hw_ssd1327_init);
+#endif
 
 
-rt_err_t ssd1327_write_cmd(const rt_uint8_t cmd)
+int ssd1327_write_cmd(const rt_uint8_t cmd)
 {
     rt_pin_write(DC_PIN, PIN_LOW);
     if (rt_spi_send(spi_dev_ssd1327, &cmd, 1) != 1)
-    {
-        SSD1327_TRACE("ssd1327_write_cmd error.\r\n");
         return -RT_ERROR;
-    }
     else
         return RT_EOK;
 }
-rt_err_t ssd1327_write_large_cmd(const rt_uint8_t *cmd,rt_uint16_t len)
+int ssd1327_write_large_cmd(const rt_uint8_t *cmd,rt_uint16_t len)
 {
 	    rt_pin_write(DC_PIN, PIN_LOW);
 	
     if (rt_spi_send(spi_dev_ssd1327, cmd, len) != len)
-    {
-        SSD1327_TRACE("ssd1327_write_large_cmd error.\r\n");
         return -RT_ERROR;
-    }
     else
         return RT_EOK;
 }
 
-rt_err_t ssd1327_write_large_data(const rt_uint8_t *data,rt_uint16_t len)
+int ssd1327_write_large_data(const rt_uint8_t *data,rt_uint16_t len)
 {
     rt_pin_write(DC_PIN, PIN_HIGH);
     if (rt_spi_send(spi_dev_ssd1327, data, len) != len)
-    {
-        SSD1327_TRACE("ssd1327_write_large_data error.\r\n");
         return -RT_ERROR;
-    }
     else
         return RT_EOK;
 }
@@ -124,7 +99,7 @@ void ssd1327_set_overall_contrast(rt_uint8_t data)
 	ssd1327_write_large_cmd(buf,2);
 }
 
-rt_err_t ssd1327_set_power(ssd1327_power power)
+int ssd1327_set_power(ssd1327_power power)
 {
 	rt_uint8_t buf[3];
 	buf[0] = 0xAF;   //ÍË³öĞİÃßÄ£Ê½
@@ -135,11 +110,18 @@ rt_err_t ssd1327_set_power(ssd1327_power power)
     return RT_EOK;
 }
 
-void ssd1327_set_scroll(rt_uint8_t x_start, rt_uint8_t x_end, rt_uint8_t y_start, rt_uint8_t y_end, scroll_speed speed, scroll_direct direct)
+void ssd1327_set_scroll(
+					rt_uint8_t x_start,
+					rt_uint8_t x_end, 
+					rt_uint8_t y_start,
+					rt_uint8_t y_end, 
+					scroll_speed speed,
+					scroll_direct direct,
+					rt_uint32_t duration)
 {
     if (x_start > x_end) //swap 
     {  
-      SWAP(x_start,x_end);
+        SWAP(x_start,x_end);
     }
 	
     if (y_start > y_end)
@@ -162,7 +144,8 @@ void ssd1327_set_scroll(rt_uint8_t x_start, rt_uint8_t x_end, rt_uint8_t y_start
     ssd1327_write_large_cmd(buf,10);
 	
     ssd1327_write_cmd(0x2F); //start
-    rt_thread_mdelay(15);
+    rt_thread_mdelay(duration);
     ssd1327_write_cmd(0x2E); //stop;
 }
 
+#endif

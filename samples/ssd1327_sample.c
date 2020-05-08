@@ -4,6 +4,7 @@
 #include "SGUI_Text.h"
 #include "SGUI_FontResource.h"
 #include "SGUI_ProcessBar.h"
+#if (defined(PKG_USING_SSD1327) && defined(PKG_USING_SSD1327_SAMPLE))|| defined(RT_DEBUG_SSD1327)
 void ssd1327_sample()
 {
 
@@ -80,3 +81,5 @@ void ssd1327_sample()
 }
 
 MSH_CMD_EXPORT(ssd1327_sample,ssd1327 sample);
+
+#endif

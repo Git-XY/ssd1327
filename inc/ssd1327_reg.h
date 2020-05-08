@@ -9,11 +9,13 @@
  */
 #ifndef __SSD1327_REG_H__
 #define __SSD1327_REG_H__
+
+#if defined(PKG_USING_SSD1327) || defined(RT_DEBUG_SSD1327)
  
 #define SSD1327_SET_COLUMN_ADDR 	0x15
 #define SSD1327_SET_ROW_ADDR    	0x75
  
  
- 
+#endif 
 #endif
 

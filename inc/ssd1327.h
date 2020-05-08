@@ -11,9 +11,9 @@
 #define __SSD1327_H__
 
 #include <rthw.h>
-#include <rtdevice.h>
 #include "ssd1327_reg.h"
 
+#if defined(PKG_USING_SSD1327) || defined(RT_DEBUG_SSD1327)
 typedef enum ssd1327_set_power
 {
 	POWER_OFF = 0x02,
@@ -39,13 +39,26 @@ typedef enum ssd1327_set_scroll_direct
 }scroll_direct;
 
 int rt_hw_ssd1327_init(void);
-rt_err_t ssd1327_write_cmd(const rt_uint8_t cmd);
-rt_err_t ssd1327_write_large_cmd(const rt_uint8_t *cmd,rt_uint16_t len);
-rt_err_t ssd1327_write_large_data(const rt_uint8_t *data,rt_uint16_t len);
-void ssd1327_set_overall_contrast(rt_uint8_t data);
-rt_err_t ssd1327_set_power(ssd1327_power power);
-void ssd1327_set_scroll(rt_uint8_t x_start, rt_uint8_t x_end, rt_uint8_t y_start, rt_uint8_t y_end,\
-scroll_speed speed, scroll_direct direct);
 
+int ssd1327_write_cmd(const rt_uint8_t cmd);
+
+int ssd1327_write_large_cmd(const rt_uint8_t *cmd,rt_uint16_t len);
+
+int ssd1327_write_large_data(const rt_uint8_t *data,rt_uint16_t len);
+
+void ssd1327_set_overall_contrast(rt_uint8_t data);
+
+int ssd1327_set_power(ssd1327_power power);
+
+void ssd1327_set_scroll(
+					rt_uint8_t x_start,
+					rt_uint8_t x_end, 
+					rt_uint8_t y_start,
+					rt_uint8_t y_end, 
+					scroll_speed speed,
+					scroll_direct direct,
+					rt_uint32_t duration);
+
+#endif
 #endif
 

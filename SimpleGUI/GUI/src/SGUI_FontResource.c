@@ -90,7 +90,7 @@ const SGUI_FONT_RES SGUI_DEFAULT_FONT_16 =
 	/*SGUI_FN_IF_IS_FULL_WIDTH      fnIsFullWidth*/		SGUI_Resource_IsFullWidth_Default
 };
 
-const SGUI_FONT_RES SGUI_DEFAULT_FONT_32 =
+const SGUI_FONT_RES SGUI_DEFAULT_FONT_46 =
 {
     /*SGUI_INT                      iHalfWidth*/		16,
     /*SGUI_INT                      iFullWidth*/		0,

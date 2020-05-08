@@ -1,6 +1,8 @@
 #include "ssd1327.h"
 #include "oled.h"
 
+#if defined(PKG_USING_SSD1327) || defined(RT_DEBUG_SSD1327)
+
 static rt_uint8_t frameBuffer  [OLED_FRAME_BUFFER_SIZE];
 #define CoordsToAddress(x,y) (((x) >> 1)+((y) << 6)) // y<<6 == y*64
 
@@ -121,3 +123,4 @@ void SCREEN_RefreshScreen(void)
 {
     oled_refresh_all();
 }
+#endif
